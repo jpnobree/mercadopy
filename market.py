@@ -1,12 +1,12 @@
 from typing import List, Dict
 from time import sleep
 
-from models.product import Product
+from models.produto import Produto
 from utils.helper import formata_float_str_moeda
 
 
-products: List[Product] = []
-carrinho: List[Dict[Product, int]] = []
+produtos: List[Produto] = []
+carrinho: List[Dict[Produto, int]] = []
 
 
 def main() -> None:
@@ -54,21 +54,21 @@ def cadastrar_produto() -> None:
     nome: str = input('Informe o nome do produto: ')
     preco: float = float(input('Informe o preço do produto: '))
 
-    product: Product = product(nome, preco)
+    produto: Produto = Produto(nome, preco)
 
-    products.append(product)
+    produtos.append(produto)
 
-    print(f'O produto {product.nome} foi cadastrado com sucesso!')
+    print(f'O produto {produto.nome} foi cadastrado com sucesso!')
     sleep(2)
-    menu(2)
+    menu()
 
 
 def listar_produto() -> None:
-    if len(products) > 0:
+    if len(produtos) > 0:
         print('Listagem de produtos')
         print('--------------------')
-        for product in products:
-            print(product)
+        for produto in produtos:
+            print(produto)
             print('----------------')
             sleep(1)
     else:
@@ -79,10 +79,66 @@ def listar_produto() -> None:
 
 
 def comprar_produto() -> None:
-    pass
+    if len(produtos) > 0:
+        print('Informe o código do produto que deseja adicionar ao carrinho.')
+        print('-------------------------------------------------------------')
+        print('=================== Produto disponíveis =====================')
+        for produto in produtos:
+            print(produto)
+            print('---------------------------------------------------------')
+            sleep(1)
+        codigo: int = int(input())
+
+        produto: Produto = pega_produto_por_codigo(codigo)
+
+
+        if produto: 
+            if len(carrinho) > 0:
+                tem_no_carrinho: bool = False
+                for item in carrinho:
+                    quant: int = item.get(produto)
+                    if quant:
+                        item[produto] = quant + 1
+                        print(f'O produto {produto.nome} agora possui {quant + 1} unidades do carrinho.')
+                        tem_no_carrinho = True
+                        sleep(2)
+                        menu()
+                if not tem_no_carrinho:
+                    prod = {produto: 1}
+                    carrinho.append(prod)
+                    print(f'O produto {produto.nome} foi adicionado ao carrinho.')
+                    sleep(2)
+                    menu()
+
+
+            else:
+                item = {produto: 1}
+                carrinho.append(item)
+                print(f'O produto {produto.nome} foi adicionado ao carrinho.')
+                sleep(2)
+                menu()
+        else: 
+            print('O produto com código {codigo} não foi encontrado!')
+            sleep(2)
+            menu()
+    else:
+        print('Ainda não existem produtos para vender!')
+    sleep(2)
+    menu()
 
 def visualizar_carrinho() -> None:
-    pass
+    if len(carrinho) > 0:
+        print(f'Produtos no carrinho: ')
+        for item in carrinho:
+            for dados in item.items():
+                print(dados[0])
+                print(f'Quantidade: {dados[1]}')
+                print('-----------------------')
+                sleep(1)
+    else:
+        print('Ainda não existem produtos no carrinho.')
+    sleep(2)
+    menu()
 
 def fechar_pedido() -> None:
     if len(carrinho) > 0:
@@ -96,7 +152,7 @@ def fechar_pedido() -> None:
                 valor_total += dados[0].preco * dados[1]
                 print('--------------------')
                 sleep(1)
-        print(f'Sua fatura é {formata_float_str_moeda}')
+        print(f'Sua fatura é {formata_float_str_moeda(valor_total)}')
         print('Volte sempre!')
         carrinho.clear()
         sleep(5)
@@ -106,12 +162,12 @@ def fechar_pedido() -> None:
         menu()
 
 def pega_produto_por_codigo(codigo: int) -> None:
-    p: Product = None
+    p: Produto = None
 
 
-    for product in products:
-        if product.codigo == codigo:
-            p = product
+    for produto in produtos:
+        if produto.codigo == codigo:
+            p = produto
     return p
 
 if __name__ == '__main__':
